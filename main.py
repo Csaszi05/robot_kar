@@ -14,7 +14,7 @@ class App:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Arturito - Control Panel")
-        self.root.geometry("620x360")
+        self.root.geometry("720x360")
 
         self.ser: serial.Serial | None = None
 
@@ -29,10 +29,10 @@ class App:
 
         ttk.Button(top, text="Refresh", command=self.refresh_ports).pack(side="left", padx=6)
         ttk.Button(top, text="Connect", command=self.connect).pack(side="right", padx=6)
-        ttk.Button(top, text="Disconnect", command=self.disconnect).pack(side="right")
+        ttk.Button(top, text="Disconnect", command=self.disconnect).pack(side="right", padx=6)
 
         self.status_var = tk.StringVar(value="Nincs csatlakozva")
-        ttk.Label(top, textvariable=self.status_var, padding=(10,0)).pack(fill="x")
+        ttk.Label(root, textvariable=self.status_var, padding=(10,0)).pack(fill="x")
 
 
         body = ttk.Frame(root, padding=10)
@@ -148,7 +148,6 @@ class App:
             self.status_var.set(f"Olvasási hiba: {e}")
 
         self.root.after(100, self.poll_serial)
-
 
 
 def main():

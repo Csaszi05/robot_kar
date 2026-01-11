@@ -18,6 +18,9 @@ class App:
 
         self.ser: serial.Serial | None = None
 
+        # Debounce (rate limit) küldéshez
+        self.send_jobs: dict[int, str] = {}  # servo_idx -> after_id
+        self.SEND_DEBOUNCE_MS = 60
 
         top = ttk.Frame(root, padding=10)
         top.pack(fill="x")
@@ -62,8 +65,8 @@ class App:
                     v.set(angle)
                     lbl.config(text=str(angle))
 
-                    #ez itt realtime küldés ha csatlakozva vagyunk
-                    self.send_command(servo_idx, angle)
+                    # Debounce küldés: nem spammelünk, csak ha megállt a húzás
+                    self.schedule_send(servo_idx, angle)
                 return cb
 
             slider.configure(command=make_cb(i, var, value_label))
@@ -114,6 +117,28 @@ class App:
                 pass
         self.ser = None
         self.status_var.set("Nincs csatlakozva")
+
+    def schedule_send(self, servo_idx: int, angle: int) -> None:
+        """Debounce: csak akkor küldünk, ha egy kicsit megállt a húzás."""
+        if not self.connected:
+            return
+
+        angle = max(0, min(180, int(angle)))
+
+        # ha már volt ütemezett küldés erre a szervóra, töröljük
+        prev = self.send_jobs.get(servo_idx)
+        if prev is not None:
+            try:
+                self.root.after_cancel(prev)
+            except Exception:
+                pass
+
+        # új küldés ütemezése X ms múlva
+        job_id = self.root.after(
+            self.SEND_DEBOUNCE_MS,
+            lambda: self.send_command(servo_idx, angle)
+        )
+        self.send_jobs[servo_idx] = job_id
 
     def send_command(self, servo_idx: int, angle: int):
         if not self.connected:

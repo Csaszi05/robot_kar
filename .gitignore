@@ -1,0 +1,30 @@
+# Virtual environment
+venv/
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# SQLite / local db (ha lesz)
+*.sqlite3
